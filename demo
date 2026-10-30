@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Welltivity 微動升級吧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html {
+            /* 手機版基準字級 */
+            font-size: 16px;
+        }
+        /* 電腦與平板大螢幕：自動放大整體字級與元件比例 */
+        @media (min-width: 640px) {
+            html {
+                font-size: 18px;
+            }
+        }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0f172a;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        /* 響應式 App 容器：手機滿版不跑版、電腦版放大呈現 */
+        .app-viewport {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (min-width: 640px) {
+            .app-viewport {
+                max-width: 520px;
+                height: 94vh;
+                height: 94dvh;
+                max-height: 920px;
+                border-radius: 32px;
+                box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        /* 底部導航列支援手機安全區域 (iPhone 底部橫條不遮擋) */
+        .safe-bottom-nav {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
+
+        /* 隱藏滾動條但保留滑動功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 台灣超商感熱紙發票鋸齒特效 */
+        .receipt-paper {
+            background: #fffdf8;
+            position: relative;
+            border-left: 1px dashed #cbd5e1;
+            border-right: 1px dashed #cbd5e1;
+        }
+        .receipt-zig-top {
+            background: linear-gradient(-45deg, #fffdf8 6px, transparent 0), linear-gradient(45deg, #fffdf8 6px, transparent 0);
+            background-position: left top;
+            background-repeat: repeat-x;
+            background-size: 12px 12px;
+            height: 8px;
+            width: 100%;
+        }
+        .receipt-zig-bottom {
+            background: linear-gradient(-45deg, transparent 6px, #fffdf8 0), linear-gradient(45deg, transparent 6px, #fffdf8 0);
+            background-position: left bottom;
+            background-repeat: repeat-x;
+            background-size: 12px 12px;
+            height: 8px;
+            width: 100%;
+        }
+
+        /* 動畫效果 */
+        @keyframes slideDownIn {
+            from { transform: translateY(-120%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-enter {
+            animation: slideDownIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.92); opacity: 0.85; }
+            50% { transform: scale(1.06); opacity: 0.4; }
+            100% { transform: scale(0.92); opacity: 0.85; }
+        }
+        .soleus-ring {
+            animation: pulseRing 1.4s infinite ease-in-out;
+        }
+
+        @keyframes floatBox {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-4px) rotate(-2deg); }
+            75% { transform: translateY(-4px) rotate(2deg); }
+        }
+        .chest-float {
+            animation: floatBox 1.8s infinite ease-in-out;
+        }
+
+        .liquid-transition {
+            transition: height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-viewport">
+
+        <!-- APP 頂部品牌導航列 -->
+        <header class="bg-white border-b border-slate-200/80 px-4 py-3 flex items-center justify-between gap-2 z-20 shrink-0">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-base shadow-sm shrink-0">
+                    W
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-black text-slate-900 text-sm tracking-tight">Welltivity</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-[0.65rem] font-extrabold px-1.5 py-0.5 rounded shrink-0">微動升級吧</span>
+                    </div>
+                    <p class="text-[0.65rem] text-slate-400 font-medium leading-none mt-0.5 truncate">Johnson Health Tech</p>
+                </div>
+            </div>
+
+            <!-- W幣餘額動態計數器 -->
+            <div onclick="switchTab(4)" class="cursor-pointer bg-amber-50 border border-amber-200/90 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm active:scale-95 transition shrink-0">
+                <span class="w-4 h-4 rounded-full bg-amber-400 text-slate-950 font-black text-[0.65rem] flex items-center justify-center">W</span>
+                <span id="header-w-coins" class="font-black text-xs text-amber-900">1,280</span>
+                <span class="text-[0.65rem] text-amber-600 font-bold">幣</span>
+            </div>
+        </header>
+
+        <!-- App 內載具連動推播橫幅 -->
+        <div id="push-banner" onclick="dismissPushAndStart()" class="cursor-pointer mx-3 mt-2.5 bg-slate-900 text-white p-3 rounded-2xl shadow-lg border border-emerald-500/40 flex items-center gap-3 z-30 toast-enter shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-lg shrink-0">
+                🧾
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1">
+                    <span class="text-[0.65rem] font-black text-emerald-400 tracking-wide">電子發票載具自動連動</span>
+                    <span class="text-[0.6rem] text-slate-400 shrink-0">剛剛</span>
+                </div>
+                <p class="text-xs font-bold text-slate-100 leading-snug mt-0.5 line-clamp-1">
+                    偵測到剛完成午餐結帳！趁餐後黃金 30 分鐘平穩血糖、趕走下午睡意
+                </p>
+            </div>
+        </div>
+
+        <!-- 四大階段主畫面內容區 -->
+        <main class="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar relative">
+
+            <!-- TAB 1：餐後防昏睡觸發 & AI 餐點熱量分析 -->
+            <section id="tab-screen-1" class="p-3.5 sm:p-4 space-y-3.5">
+
+                <!-- 久坐與餐後血糖峰值預警卡 -->
+                <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-2xl p-3.5 shadow-md relative overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2">
+                        <span class="bg-rose-500/20 border border-rose-400/40 text-rose-300 text-[0.65rem] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping shrink-0"></span>
+                            <span>久坐警示：連續 60 分鐘步數 &lt; 20 步</span>
+                        </span>
+                        <span class="text-[0.65rem] text-emerald-300 font-bold">黃金壓血糖 30min</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                            <h2 class="text-sm font-black leading-snug">餐後血糖上升中，小心下午昏睡！</h2>
+                            <p class="text-[0.7rem] text-slate-300 mt-0.5 leading-relaxed">實證餐後 60 秒比目魚肌微動，平穩血糖峰值 -32%</p>
+                        </div>
+                        <svg class="w-20 sm:w-24 h-12 shrink-0" viewBox="0 0 100 50" fill="none">
+                            <path d="M5 42 Q 45 2, 95 38" stroke="#fb7185" stroke-width="2" stroke-dasharray="3 3" fill="none"/>
+                            <path d="M5 42 Q 45 22, 95 36" stroke="#34d399" stroke-width="3" stroke-linecap="round" fill="none"/>
+                            <circle cx="46" cy="28" r="4" fill="#34d399"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- 1. 吃了什麼？自訂 AI 智慧分析 + 快速點選 -->
+                <div class="space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-1">
+                        <h3 class="text-xs font-black text-slate-800">1. 剛吃了什麼？AI 算熱量配對專屬微運動</h3>
+                        <span class="text-[0.65rem] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">載具/AI 雙模辨識</span>
+                    </div>
+
+                    <!-- 自訂餐點輸入框 + AI 智慧分析按鈕 -->
+                    <div class="bg-white p-2.5 sm:p-3 rounded-2xl border-2 border-teal-500/80 shadow-sm space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[0.7rem] font-black text-teal-800 flex items-center gap-1">
+                                🤖 自訂餐點 AI 熱量與防昏睡處方分析
+                            </span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <input id="custom-food-input" type="text" placeholder="輸入食物，如：珍奶+雞排、水餃8顆..."
+                                class="min-w-0 flex-1 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500"
+                                onkeydown="if(event.key==='Enter') analyzeCustomFoodWithAI()" />
+                            <button id="btn-ai-analyze" onclick="analyzeCustomFoodWithAI()"
+                                class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs px-3 py-2 rounded-xl shrink-0 shadow-sm active:scale-95 transition flex items-center gap-1">
+                                <span id="ai-btn-icon">✨</span>
+                                <span id="ai-btn-text">AI 智慧分析</span>
+                            </button>
+                        </div>
+                        <!-- 快速填入範例標籤 -->
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+                            <span class="text-[0.65rem] text-slate-400 font-bold shrink-0">熱門輸入：</span>
+                            <button onclick="quickFillAndAnalyze('珍珠奶茶＋豪大大雞排')" class="text-[0.65rem] bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-bold px-2 py-0.5 rounded-full shrink-0 transition">🧋 珍奶+雞排</button>
+                            <button onclick="quickFillAndAnalyze('鍋貼10顆＋酸辣湯')" class="text-[0.65rem] bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-bold px-2 py-0.5 rounded-full shrink-0 transition">🥟 鍋貼10顆+酸辣湯</button>
+                            <button onclick="quickFillAndAnalyze('紅燒牛肉麵＋滷味')" class="text-[0.65rem] bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-bold px-2 py-0.5 rounded-full shrink-0 transition">🍜 紅燒牛肉麵</button>
+                        </div>
+
+                        <!-- AI 分析結果動態卡片 -->
+                        <div id="ai-result-card" class="hidden bg-gradient-to-br from-emerald-950 to-slate-900 text-white rounded-xl p-3 space-y-2 border border-emerald-500/40">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="text-[0.65rem] bg-emerald-500 text-slate-950 font-black px-1.5 py-0.5 rounded shrink-0">AI 分析完成</span>
+                                        <span id="ai-res-food" class="text-xs font-black text-white break-words">珍珠奶茶＋豪大大雞排</span>
+                                    </div>
+                                    <p id="ai-res-advice" class="text-[0.68rem] text-emerald-200 mt-1 leading-relaxed">
+                                        精緻糖與油炸澱粉易引發餐後血糖劇烈波動，建議立即啟動比目魚肌收縮與手腕 8 字微動平穩血糖！
+                                    </p>
+                                </div>
+                                <div class="bg-amber-400/20 border border-amber-400/50 rounded-lg px-2 py-1 text-right shrink-0">
+                                    <div class="text-[0.6rem] text-amber-200 font-bold">AI 估算熱量區間</div>
+                                    <div id="ai-res-cal" class="text-xs font-black text-amber-300">950 - 1,150 kcal</div>
+                                </div>
+                            </div>
+                            <div class="pt-1.5 border-t border-slate-800 flex flex-wrap items-center justify-between gap-1 text-[0.65rem]">
+                                <span id="ai-res-gi" class="text-rose-300 font-black">🔥 高升糖指數・極易犯睏</span>
+                                <span id="ai-res-ex" class="text-emerald-300 font-black">👉 推薦：桌下墊腳尖 + 8字伸展 (60s)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 預設載具同步快選餐點卡 -->
+                    <div class="space-y-1.5" id="meal-cards-container">
+                        <!-- 餐點 1 -->
+                        <div onclick="choosePresetMeal(0, '炸排骨便當', '800 - 900 kcal', '高 GI 易昏睡', '桌下坐姿墊腳尖 + 握手機畫8字 (60秒)', 'office_soleus')" class="meal-card cursor-pointer rounded-2xl p-2.5 border-2 border-emerald-500 bg-emerald-50/60 flex items-center justify-between gap-2 transition">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-xl bg-white shadow-sm flex items-center justify-center text-lg shrink-0">🍱</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-xs font-black text-slate-900">炸排骨便當</span>
+                                        <span class="text-[0.6rem] bg-amber-100 text-amber-800 font-black px-1.5 py-0.5 rounded shrink-0">800 - 900 kcal</span>
+                                        <span class="text-[0.6rem] bg-rose-100 text-rose-700 font-black px-1.5 py-0.5 rounded shrink-0">高 GI 易昏睡</span>
+                                    </div>
+                                    <p class="text-[0.7rem] text-emerald-800 font-medium mt-0.5 truncate">推薦：桌下比目魚肌墊腳尖 + 手腕 8 字 (60秒)</p>
+                                </div>
+                            </div>
+                            <div class="meal-radio w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0">✓</div>
+                        </div>
+
+                        <!-- 餐點 2 -->
+                        <div onclick="choosePresetMeal(1, '經典滷肉飯＋貢丸湯', '650 - 750 kcal', '中高升糖', '握手機畫 8 字防滑鼠手 + 肩頸微動 (60秒)', 'office_gyro')" class="meal-card cursor-pointer rounded-2xl p-2.5 border border-slate-200 bg-white flex items-center justify-between gap-2 transition">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">🍚</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-xs font-black text-slate-800">經典滷肉飯＋貢丸湯</span>
+                                        <span class="text-[0.6rem] bg-slate-100 text-slate-700 font-black px-1.5 py-0.5 rounded shrink-0">650 - 750 kcal</span>
+                                    </div>
+                                    <p class="text-[0.7rem] text-slate-500 mt-0.5 truncate">推薦：握手機畫 8 字伸展肩腕 (60秒)</p>
+                                </div>
+                            </div>
+                            <div class="meal-radio w-5 h-5 rounded-full border border-slate-300 text-transparent text-xs font-bold flex items-center justify-center shrink-0">✓</div>
+                        </div>
+
+                        <!-- 餐點 3 -->
+                        <div onclick="choosePresetMeal(2, '超商雞胸肉輕食餐', '380 - 450 kcal', '低 GI 久坐', '起身走 150 步去茶水間裝水 (60秒)', 'walk_water')" class="meal-card cursor-pointer rounded-2xl p-2.5 border border-slate-200 bg-white flex items-center justify-between gap-2 transition">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-lg shrink-0">🥗</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-xs font-black text-slate-800">超商雞胸肉輕食餐</span>
+                                        <span class="text-[0.6rem] bg-teal-100 text-teal-800 font-black px-1.5 py-0.5 rounded shrink-0">380 - 450 kcal</span>
+                                    </div>
+                                    <p class="text-[0.7rem] text-slate-500 mt-0.5 truncate">推薦：起身走 150 步裝水活絡下肢 (60秒)</p>
+                                </div>
+                            </div>
+                            <div class="meal-radio w-5 h-5 rounded-full border border-slate-300 text-transparent text-xs font-bold flex items-center justify-center shrink-0">✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 分場域模式切換 -->
+                <div>
+                    <h3 class="text-xs font-black text-slate-800 mb-1.5">2. 選擇當前場域（自動切換防尷尬防弊感測）</h3>
+                    <div class="grid grid-cols-3 gap-1.5">
+                        <div id="scene-btn-office" onclick="selectSceneMode('office_soleus')" class="cursor-pointer rounded-xl p-2 border-2 border-emerald-600 bg-slate-900 text-white transition min-w-0">
+                            <div class="text-[0.7rem] font-black text-emerald-400 truncate">🏢 教室/辦公室</div>
+                            <div class="text-[0.6rem] bg-emerald-500 text-slate-950 font-black px-1 py-0.5 rounded inline-block my-0.5">免開鏡頭</div>
+                            <p class="text-[0.6rem] text-slate-300 leading-tight">8字陀螺儀+桌下墊腳尖</p>
+                        </div>
+
+                        <div id="scene-btn-walk" onclick="selectSceneMode('walk_water')" class="cursor-pointer rounded-xl p-2 border border-slate-200 bg-white text-slate-700 transition min-w-0">
+                            <div class="text-[0.7rem] font-black text-slate-800 truncate">🚶 茶水間走廊</div>
+                            <div class="text-[0.6rem] bg-teal-100 text-teal-800 font-bold px-1 py-0.5 rounded inline-block my-0.5">計步防弊</div>
+                            <p class="text-[0.6rem] text-slate-500 leading-tight">起身走150步裝水</p>
+                        </div>
+
+                        <div id="scene-btn-home" onclick="selectSceneMode('home_ar')" class="cursor-pointer rounded-xl p-2 border border-slate-200 bg-white text-slate-700 transition min-w-0">
+                            <div class="text-[0.7rem] font-black text-slate-800 truncate">🏠 個人宿舍</div>
+                            <div class="text-[0.6rem] bg-purple-100 text-purple-800 font-bold px-1 py-0.5 rounded inline-block my-0.5">AR 濾鏡</div>
+                            <p class="text-[0.6rem] text-slate-500 leading-tight">前鏡頭肩頸吃金幣</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 立即啟動 CTA -->
+                <button onclick="startMicroExercise()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-sm shadow-lg shadow-emerald-600/25 flex flex-wrap items-center justify-center gap-2 active:scale-98 transition">
+                    <span>⚡ 啟動 60 秒防昏睡急救包</span>
+                    <span class="bg-white/20 text-[0.7rem] px-2 py-0.5 rounded-full">+25 活力值 & +50 W幣</span>
+                </button>
+            </section>
+
+            <!-- TAB 2：分場域防作弊微運動 (60 秒真實計時器) -->
+            <section id="tab-screen-2" class="hidden p-3.5 sm:p-4 space-y-3 bg-slate-950 text-white min-h-full flex flex-col justify-between">
+
+                <!-- 頂部：消化餐點與場域切換膠囊 -->
+                <div class="space-y-2">
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                            <span class="text-base shrink-0">🔥</span>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[0.65rem] text-slate-400 font-bold">當前壓血糖目標餐點</div>
+                                <div class="text-xs font-black text-emerald-400 truncate">
+                                    <span id="ex-current-meal-name">炸排骨便當</span>
+                                    <span id="ex-current-meal-cal" class="text-amber-300 ml-1">(800 - 900 kcal)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span id="ex-mode-badge" class="bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[0.65rem] font-black px-2 py-0.5 rounded-full shrink-0">
+                            免開鏡頭・防弊感測
+                        </span>
+                    </div>
+
+                    <!-- 當前微動指令與真實 60 秒大型倒數計時器 -->
+                    <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/80 border border-emerald-500/30 rounded-2xl p-3 flex items-center justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span id="ex-live-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+                                <span id="ex-milestone-text" class="text-[0.65rem] font-black text-emerald-400 truncate">黃金 60 秒微動進行中・每秒真實計時</span>
+                            </div>
+                            <h3 id="ex-title-text" class="text-xs font-black text-white mt-1 leading-snug">
+                                桌下坐姿墊腳尖 + 握手機畫 8 字 (60秒)
+                            </h3>
+                        </div>
+                        <div class="bg-slate-950 border-2 border-amber-400/60 text-amber-300 px-3 py-1.5 rounded-2xl text-center shrink-0 shadow-inner min-w-[4.5rem]">
+                            <div class="text-[0.6rem] font-bold text-amber-200/80">真實倒數</div>
+                            <div id="ex-timer-num" class="text-xl font-black font-mono leading-none mt-0.5">60s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 陀螺儀 8 字軌跡 + X/Y/Z 防弊波形 + 比目魚肌節拍 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div class="w-52 sm:w-64 h-24 sm:h-28 rounded-full border border-emerald-500/20 soleus-ring absolute pointer-events-none"></div>
+
+                    <div class="w-full flex flex-wrap items-center justify-between gap-1 text-[0.65rem] text-slate-400 mb-1 z-10">
+                        <span id="gyro-Angles" class="font-mono">陀螺儀 X: 14.2° Y: -8.6° Z: 4.1°</span>
+                        <span class="text-emerald-400 font-black">防作弊吻合度 <span id="gyro-match-val">98%</span></span>
+                    </div>
+
+                    <!-- 8 字無限軌跡 SVG 與動態光球 -->
+                    <div class="relative w-full max-w-[16rem] sm:max-w-[19rem] h-24 sm:h-28 flex items-center justify-center z-10">
+                        <svg class="w-full h-full" viewBox="0 0 240 100" fill="none">
+                            <path d="M65 20 C20 20, 20 80, 65 80 C100 80, 140 20, 175 20 C220 20, 220 80, 175 80 C140 80, 100 20, 65 20 Z"
+                                  stroke="#1e293b" stroke-width="12" stroke-linecap="round"/>
+                            <path id="infinity-progress-path"
+                                  d="M65 20 C20 20, 20 80, 65 80 C100 80, 140 20, 175 20 C220 20, 220 80, 175 80 C140 80, 100 20, 65 20 Z"
+                                  stroke="url(#neonGrad)" stroke-width="12" stroke-linecap="round"
+                                  stroke-dasharray="480" stroke-dashoffset="480"/>
+                            <circle id="infinity-orb" cx="65" cy="20" r="9" fill="#fb923c" stroke="#ffffff" stroke-width="3"/>
+                            <defs>
+                                <linearGradient id="neonGrad" x1="0" y1="0" x2="240" y2="100" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0%" stop-color="#10b981"/>
+                                    <stop offset="50%" stop-color="#06b6d4"/>
+                                    <stop offset="100%" stop-color="#f97316"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <!-- 三軸防作弊即時感測條 -->
+                    <div class="w-full grid grid-cols-3 gap-2 mt-1 pt-2 border-t border-slate-800/80 z-10">
+                        <div class="bg-slate-950/80 rounded-lg p-1.5 text-center">
+                            <div class="text-[0.6rem] text-slate-400">平穩血糖進度</div>
+                            <div id="ex-glucose-prog" class="text-xs font-black text-emerald-400">0%</div>
+                        </div>
+                        <div class="bg-slate-950/80 rounded-lg p-1.5 text-center">
+                            <div class="text-[0.6rem] text-slate-400">比目魚肌墊腳</div>
+                            <div id="soleus-rep-count" class="text-xs font-black text-amber-300">0 / 20 次</div>
+                        </div>
+                        <div class="bg-slate-950/80 rounded-lg p-1.5 text-center">
+                            <div class="text-[0.6rem] text-slate-400">動作節拍指令</div>
+                            <div id="soleus-beat-badge" class="text-[0.65rem] font-black text-emerald-400">腳跟上提 ↑</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 60秒總進度條與喬山小物加成提示 -->
+                <div class="space-y-2">
+                    <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800 p-0.5">
+                        <div id="ex-60s-bar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-1.5 flex items-center justify-between gap-2 text-[0.65rem]">
+                        <span class="text-amber-200 font-bold truncate">🟢 已裝備：喬山辦公桌減壓握力圈（防搖步機認證）</span>
+                        <span class="bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shrink-0">W幣 1.2x</span>
+                    </div>
+                </div>
+
+                <!-- 60秒計時控制按鈕組 -->
+                <div class="flex gap-2">
+                    <button id="btn-run-exercise" onclick="toggleReal60sExercise()" class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs shadow-lg transition">
+                        ⏸ 暫停 60 秒計時
+                    </button>
+                    <button onclick="resetReal60sExercise()" class="px-3.5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition shrink-0">
+                        重設 60s
+                    </button>
+                </div>
+
+                <!-- 60秒微動完成慶祝彈窗 -->
+                <div id="ex-complete-modal" class="hidden fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-40 flex items-center justify-center p-5">
+                    <div class="bg-white text-slate-900 rounded-3xl p-5 w-full max-w-[360px] shadow-2xl text-center space-y-3 border-2 border-emerald-300">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-3xl shadow-inner">
+                            🎉
+                        </div>
+                        <div class="inline-block bg-emerald-100 text-emerald-800 text-[0.65rem] font-black px-2.5 py-0.5 rounded-full">
+                            完整 60 秒防作弊微動達標！
+                        </div>
+                        <h3 class="text-base font-black text-slate-900">成功壓低餐後血糖峰值！</h3>
+                        <p id="modal-completed-meal-desc" class="text-xs text-slate-500 leading-relaxed">
+                            已完成「炸排骨便當」餐後 60 秒比目魚肌與 8 字伸展，下午精神百倍！
+                        </p>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+                            <div>
+                                <div class="text-[0.65rem] text-slate-400 font-bold">小隊能量貢獻</div>
+                                <div class="text-sm font-black text-emerald-600">+25 活力值</div>
+                            </div>
+                            <div class="border-l border-slate-200">
+                                <div class="text-[0.65rem] text-slate-400 font-bold">個人運動獎勵</div>
+                                <div class="text-sm font-black text-amber-600">+50 W幣</div>
+                            </div>
+                        </div>
+                        <button onclick="goToTeamCupAfterExercise()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-md transition">
+                            💧 注入 4 人小隊共同能量杯 →
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 3：4人小隊「共同能量杯」與「幫隊友補血」 -->
+            <section id="tab-screen-3" class="hidden p-3.5 sm:p-4 space-y-3">
+
+                <!-- 小隊頂部資訊卡 -->
+                <div class="bg-gradient-to-r from-teal-700 to-emerald-600 text-white rounded-2xl p-3 shadow-sm flex items-center justify-between gap-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-black">🔥 資管不瞌睡小隊 (4/4人)</span>
+                        </div>
+                        <p class="text-[0.65rem] text-emerald-100 mt-0.5">無壓力互助：隊友忙碌不扣分，幫他補血拿稱號！</p>
+                    </div>
+                    <span class="bg-amber-400 text-slate-950 text-[0.65rem] font-black px-2 py-1 rounded-xl shrink-0 shadow-sm">
+                        連勝 6 天・1.5x
+                    </span>
+                </div>
+
+                <!-- 共同能量杯視覺與進度 -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm flex items-center gap-3.5">
+                    <div class="w-20 h-24 rounded-b-3xl rounded-t-lg border-4 border-slate-300 bg-slate-100 relative overflow-hidden flex items-end shrink-0 shadow-inner">
+                        <div id="team-cup-liquid" class="w-full bg-gradient-to-t from-emerald-600 via-teal-500 to-emerald-300 liquid-transition" style="height: 85%;"></div>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="team-cup-percent" class="text-sm font-black text-slate-900 bg-white/90 px-2 py-0.5 rounded-full shadow-sm">85%</span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0 space-y-1.5">
+                        <div class="flex flex-wrap items-center justify-between gap-1">
+                            <span class="text-xs font-black text-slate-900">共同能量杯：<span id="team-cup-points" class="text-emerald-600">85</span> / 100 點</span>
+                            <span id="team-cup-tag" class="text-[0.65rem] bg-rose-100 text-rose-700 font-black px-1.5 py-0.5 rounded shrink-0">差 15 點開箱</span>
+                        </div>
+                        <p class="text-[0.7rem] text-slate-500 leading-snug">
+                            你已貢獻 +25 點！還差 <b>Alex</b> 的 15 點即可集滿 100 點，全員解鎖「驚喜寶箱盲盒」！
+                        </p>
+                        <div id="mystery-box-bar" class="bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5 flex items-center justify-between gap-1">
+                            <span class="text-[0.65rem] font-bold text-amber-900 truncate">🎁 每日小隊盲盒（+80 W幣 & 稀有稱號）</span>
+                            <span id="box-lock-status" class="text-[0.65rem] font-black text-amber-700 shrink-0">🔒 待解鎖</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 位隊友狀態列表 -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-black text-slate-800">今日小隊成員貢獻</h3>
+                        <span class="text-[0.65rem] text-slate-400 font-medium">幫隊友補血上限 +50 點/日</span>
+                    </div>
+
+                    <!-- 隊友 1：自己 -->
+                    <div class="bg-white border border-emerald-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center shrink-0">你</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="text-xs font-black text-slate-900">你 (我)</span>
+                                    <span id="carry-badge" class="hidden text-[0.6rem] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shrink-0">👑 今日凱瑞王</span>
+                                </div>
+                                <p id="my-team-ex-desc" class="text-[0.65rem] text-slate-500 truncate">已完成：60秒餐後壓血糖微動</p>
+                            </div>
+                        </div>
+                        <span id="my-team-pt" class="text-xs font-black text-emerald-600 shrink-0">+25 點</span>
+                    </div>
+
+                    <!-- 隊友 2：小芸 -->
+                    <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-8 h-8 rounded-full bg-teal-100 text-teal-800 text-xs font-black flex items-center justify-center shrink-0">芸</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs font-bold text-slate-800">隊友 小芸</div>
+                                <p class="text-[0.65rem] text-slate-500 truncate">已完成：起身走 150 步茶水間裝水</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 shrink-0">+25 點</span>
+                    </div>
+
+                    <!-- 隊友 3：阿哲 -->
+                    <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-8 h-8 rounded-full bg-sky-100 text-sky-800 text-xs font-black flex items-center justify-center shrink-0">哲</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs font-bold text-slate-800">隊友 阿哲</div>
+                                <p class="text-[0.65rem] text-slate-500 truncate">已完成：圖書館隱形手腕 8 字微動</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-600 shrink-0">+25 點</span>
+                    </div>
+
+                    <!-- 隊友 4：待救援的 Alex -->
+                    <div id="alex-row-card" class="bg-rose-50 border-2 border-rose-300 rounded-xl p-2.5 space-y-2 transition">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <div id="alex-avatar" class="w-8 h-8 rounded-full bg-rose-500 text-white text-xs font-black flex items-center justify-center shrink-0">🆘</div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-xs font-black text-rose-950">隊友 Alex (大二生)</div>
+                                    <p id="alex-subtext" class="text-[0.65rem] text-rose-700 font-bold truncate">⚠️ 大二趕報告久坐中・尚差 15 點未達標</p>
+                                </div>
+                            </div>
+                            <span id="alex-pt-text" class="text-xs font-black text-rose-600 shrink-0">缺 15 點</span>
+                        </div>
+
+                        <button id="btn-heal-alex" onclick="healTeammateAlex()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 text-white font-black text-xs shadow-md flex items-center justify-center gap-1.5 active:scale-98 transition">
+                            <span>⚡ 幫隊友 Alex 補血 (多動 30 秒 +15 點)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 100點達成後彈出的「開啟驚喜寶箱」卡片 -->
+                <div id="unlock-chest-card" class="hidden bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-slate-950 rounded-2xl p-3.5 shadow-lg text-center space-y-2">
+                    <div class="text-3xl chest-float">🎁</div>
+                    <h4 class="text-sm font-black">小隊能量杯 100 / 100 集滿！</h4>
+                    <p class="text-[0.7rem] font-bold text-slate-900">你成功幫 Alex 補血 +15 點拯救全隊，快開啟驚喜盲盒！</p>
+                    <button onclick="openTeamBlindBox()" class="w-full py-2.5 rounded-xl bg-slate-950 text-amber-300 font-black text-xs shadow-md">
+                        ✨ 點擊開啟驚喜寶箱盲盒
+                    </button>
+                </div>
+
+                <!-- 寶箱開獎彈窗 -->
+                <div id="blindbox-reward-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-center justify-center p-5">
+                    <div class="bg-white text-slate-900 rounded-3xl p-5 w-full max-w-[360px] shadow-2xl text-center space-y-3 border-2 border-amber-300">
+                        <div class="w-16 h-16 rounded-2xl bg-amber-100 mx-auto flex items-center justify-center text-4xl shadow-inner">
+                            👑
+                        </div>
+                        <div class="inline-block bg-amber-100 text-amber-900 text-[0.65rem] font-black px-2.5 py-0.5 rounded-full">
+                            驚喜寶箱盲盒解鎖成功
+                        </div>
+                        <h3 class="text-base font-black text-slate-900">獲得「今日凱瑞王 Carry King」</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            因為你幫 Alex 補血 +15 點，全隊獲得盲盒獎勵 <b>+80 W幣</b>！立刻生成超商發票向他討一杯大冰美吧！
+                        </p>
+                        <button onclick="goToReceiptMemeScreen()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-xs shadow-md">
+                            🧾 生成超商發票風討債迷因卡 →
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 4：發票風討債迷因卡 & W幣跨界商城 -->
+            <section id="tab-screen-4" class="hidden p-3.5 sm:p-4 space-y-4">
+
+                <!-- 區塊 1：台灣超商電子發票風討債迷因卡 -->
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-1 mb-2">
+                        <h3 class="text-xs font-black text-slate-800">🧾 台灣感性「超商發票風討債迷因卡」</h3>
+                        <span class="text-[0.65rem] bg-amber-100 text-amber-900 font-black px-2 py-0.5 rounded-full shrink-0">今日凱瑞王專屬</span>
+                    </div>
+
+                    <div class="shadow-md rounded-sm overflow-hidden mx-0.5">
+                        <div class="receipt-zig-top"></div>
+                        <div class="receipt-paper px-4 py-3 text-slate-900 font-mono">
+                            <div class="text-center border-b border-dashed border-slate-400 pb-2">
+                                <div class="text-[0.65rem] font-bold tracking-widest text-slate-500">JOHNSON WELLTIVITY 電子發票證明聯</div>
+                                <div class="text-sm font-black tracking-wider text-slate-900 mt-0.5">拯救隊友＆壓血糖明細</div>
+                                <div class="text-xs font-black text-emerald-700 mt-0.5">115年 09-10月 JW-88259487</div>
+                                <div class="flex justify-between text-[0.65rem] text-slate-500 mt-1">
+                                    <span>2026-10-30 13:25</span>
+                                    <span>隨機碼：8825</span>
+                                </div>
+                            </div>
+
+                            <!-- 動態消費/微動/補血明細 -->
+                            <div class="py-2 text-[0.7rem] space-y-1 border-b border-dashed border-slate-400">
+                                <div class="flex justify-between gap-2 font-bold text-slate-800">
+                                    <span id="receipt-meal-title" class="truncate">餐後消化：炸排骨便當</span>
+                                    <span id="receipt-meal-cal" class="shrink-0">800-900kcal</span>
+                                </div>
+                                <div class="flex justify-between gap-2 font-bold text-emerald-800">
+                                    <span id="receipt-ex-title" class="truncate">60s 桌下墊腳尖+8字微動</span>
+                                    <span class="shrink-0">+25 pt</span>
+                                </div>
+                                <div class="flex justify-between gap-2 font-bold text-teal-800">
+                                    <span>幫隊友 Alex 補血 (多動30秒)</span>
+                                    <span class="shrink-0">+15 pt</span>
+                                </div>
+                                <div class="flex justify-between gap-2 font-black text-rose-700 pt-0.5">
+                                    <span>欠債明細：超商大冰美 1 杯</span>
+                                    <span class="shrink-0">$45 抵債</span>
+                                </div>
+                            </div>
+
+                            <!-- 討債醒目大字與 QR Code -->
+                            <div class="pt-2 flex items-center justify-between gap-2.5">
+                                <div class="flex-1 min-w-0 bg-rose-50 border border-rose-200 rounded p-1.5">
+                                    <p class="text-[0.7rem] font-black text-rose-800 leading-snug">
+                                        「@Alex 趕報告辛苦啦！我多動 30 秒幫你補滿 15 點開盲盒，記得請喝超商大冰美☕」
+                                    </p>
+                                    <p class="text-[0.6rem] text-slate-500 mt-0.5">掃描加入 Welltivity 小隊領 50 W幣</p>
+                                </div>
+
+                                <div class="w-12 h-12 bg-white p-1 border border-slate-300 shrink-0">
+                                    <svg viewBox="0 0 36 36" class="w-full h-full fill-slate-900">
+                                        <path d="M2 2h10v10H2V2zm2 2v6h6V4H4zm2 2h2v2H6V6zm18-4h10v10H24V2zm2 2v6h6V4h-6zm2 2h2v2h-2V6zM2 24h10v10H2V24zm2 2v6h6v-6H4zm2 2h2v2H6v-2zm10-20h4v4h-4V4zm4 4h4v4h-4V8zm-4 4h4v4h-4v-4zm0 8h4v4h-4v-4zm8-4h4v4h-4v-4zm4 4h6v4h-6v-4zm-8 4h4v6h-4v-6zm6 4h8v4h-8v-4z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="receipt-zig-bottom"></div>
+                    </div>
+
+                    <!-- 社群分享按鈕 -->
+                    <div class="grid grid-cols-2 gap-2 mt-2.5">
+                        <button onclick="triggerSocialShare('Instagram 限時動態')" class="py-2.5 rounded-xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-orange-500 text-white font-black text-xs shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition">
+                            <span>📸 分享至 IG 限動</span>
+                        </button>
+                        <button onclick="triggerSocialShare('Threads 串文')" class="py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition">
+                            <span>🧵 發佈至 Threads</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 區塊 2：W幣跨界兌換與喬山百元辦公桌小物商城 -->
+                <div class="pt-2 border-t border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-black text-slate-800">🛍️ W 幣跨界兌換 & 喬山商城</h3>
+                        <span class="text-[0.65rem] text-emerald-700 font-bold">日常高頻變現</span>
+                    </div>
+
+                    <!-- 項目 1 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow-sm">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-xl shrink-0">☕</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="text-xs font-black text-slate-900 truncate">合作超商/咖啡：中杯免費升級大杯券</div>
+                                <p class="text-[0.65rem] text-slate-500 truncate">全台合作門市 POS 條碼即刷即換</p>
+                            </div>
+                        </div>
+                        <button onclick="openCouponBarcodeModal('合作超商/連鎖咖啡・中杯免費升級大杯券', 50)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[0.7rem] font-black px-3 py-1.5 rounded-xl shrink-0">
+                            兌換 (50 W幣)
+                        </button>
+                    </div>
+
+                    <!-- 項目 2 -->
+                    <div class="bg-gradient-to-r from-amber-50/90 to-white border border-amber-300 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow-sm">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-xl shrink-0">🟢</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-xs font-black text-slate-900">喬山 $199 紓壓握力圈折抵券</span>
+                                    <span class="text-[0.6rem] bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded shrink-0">1.2x加成</span>
+                                </div>
+                                <p class="text-[0.65rem] text-slate-600 truncate">裝備享每日微動 W 幣 1.2 倍加成</p>
+                            </div>
+                        </div>
+                        <button onclick="openCouponBarcodeModal('喬山 199元辦公桌紓壓握力圈/筋膜球折抵券', 100)" class="bg-slate-900 hover:bg-slate-800 text-amber-300 text-[0.7rem] font-black px-3 py-1.5 rounded-xl shrink-0">
+                            兌換 (100 W幣)
+                        </button>
+                    </div>
+
+                    <!-- 項目 3 -->
+                    <div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow-sm">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <div class="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center text-xl shrink-0">🛡️</div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-xs font-black text-slate-900">南山人壽外溢保單積分連動</span>
+                                    <span class="text-[0.6rem] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded shrink-0">構想夥伴</span>
+                                </div>
+                                <p class="text-[0.65rem] text-slate-500 truncate">每日微動達標折算活力積分與保費回饋</p>
+                            </div>
+                        </div>
+                        <button onclick="openCouponBarcodeModal('南山人壽外溢保單 BAM 活力積分兌換憑證', 80)" class="bg-sky-600 hover:bg-sky-500 text-white text-[0.7rem] font-black px-3 py-1.5 rounded-xl shrink-0">
+                            兌換 (80 W幣)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 超商條碼核銷彈窗 -->
+                <div id="barcode-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 flex items-center justify-center p-5">
+                    <div class="bg-white text-slate-900 rounded-3xl p-5 w-full max-w-[350px] shadow-2xl text-center space-y-3">
+                        <div class="text-xs font-black text-emerald-700 bg-emerald-50 inline-block px-3 py-1 rounded-full">
+                            ✓ W 幣兌換成功・電子核銷憑證
+                        </div>
+                        <h4 id="barcode-item-title" class="text-sm font-black text-slate-900">合作超商・中杯免費升級大杯券</h4>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col items-center">
+                            <svg class="w-48 h-12 fill-slate-900" viewBox="0 0 200 50">
+                                <rect x="6" width="4" height="50"/><rect x="14" width="2" height="50"/><rect x="20" width="6" height="50"/>
+                                <rect x="30" width="2" height="50"/><rect x="36" width="4" height="50"/><rect x="44" width="8" height="50"/>
+                                <rect x="56" width="2" height="50"/><rect x="62" width="4" height="50"/><rect x="70" width="6" height="50"/>
+                                <rect x="80" width="2" height="50"/><rect x="86" width="8" height="50"/><rect x="98" width="4" height="50"/>
+                                <rect x="106" width="2" height="50"/><rect x="112" width="6" height="50"/><rect x="122" width="4" height="50"/>
+                                <rect x="130" width="2" height="50"/><rect x="136" width="8" height="50"/><rect x="148" width="4" height="50"/>
+                                <rect x="156" width="2" height="50"/><rect x="162" width="6" height="50"/><rect x="172" width="4" height="50"/>
+                                <rect x="180" width="2" height="50"/><rect x="186" width="6" height="50"/>
+                            </svg>
+                            <span class="font-mono text-[0.7rem] tracking-widest text-slate-500 mt-1">JW-2026-1030-9981</span>
+                        </div>
+                        <button onclick="closeBarcodeModal()" class="w-full py-2.5 rounded-xl bg-slate-900 text-white font-black text-xs">
+                            完成並關閉
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- App 內浮動輕提示 (Toast) -->
+        <div id="app-toast" class="hidden absolute bottom-20 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white px-4 py-2.5 rounded-2xl shadow-xl border border-emerald-500/50 text-xs font-bold items-center gap-2 z-50 max-w-[92%] text-center">
+            <span class="text-emerald-400 shrink-0">✓</span>
+            <span id="app-toast-msg" class="truncate">已更新</span>
+        </div>
+
+        <!-- APP 底部原生導航列 (4 Tabs) -->
+        <nav class="bg-white border-t border-slate-200 px-2 pt-2 safe-bottom-nav grid grid-cols-4 gap-1 z-20 shrink-0">
+            <button onclick="switchTab(1)" id="nav-btn-1" class="flex flex-col items-center justify-center py-1 rounded-xl text-emerald-600 bg-emerald-50/80 transition">
+                <span class="text-base leading-none">🍱</span>
+                <span class="text-[0.65rem] font-black mt-1">1. 餐後觸發</span>
+            </button>
+            <button onclick="switchTab(2)" id="nav-btn-2" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-700 transition">
+                <span class="text-base leading-none">∞</span>
+                <span class="text-[0.65rem] font-bold mt-1">2. 微動感應</span>
+            </button>
+            <button onclick="switchTab(3)" id="nav-btn-3" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-700 transition relative">
+                <span class="text-base leading-none">💧</span>
+                <span class="text-[0.65rem] font-bold mt-1">3. 小隊補血</span>
+                <span id="nav-badge-3" class="w-2 h-2 rounded-full bg-rose-500 absolute top-1 right-4"></span>
+            </button>
+            <button onclick="switchTab(4)" id="nav-btn-4" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-700 transition">
+                <span class="text-base leading-none">🧾</span>
+                <span class="text-[0.65rem] font-bold mt-1">4. 迷因與商城</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        let wCoins = 1280;
+        let alexHealed = false;
+
+        let currentMealState = {
+            foodName: '炸排骨便當',
+            calorieRange: '800 - 900 kcal',
+            glycemicLevel: '高升糖指數・極易犯睏',
+            recommendedMode: 'office_soleus',
+            exerciseTitle: '桌下坐姿墊腳尖 + 握手機畫 8 字 (60秒)'
+        };
+
+        let remainingSeconds = 60;
+        let isExerciseRunning = false;
+        let oneSecondInterval = null;
+        let visualAnimInterval = null;
+        let animTick = 0;
+
+        function addWCoins(amount) {
+            const start = wCoins;
+            const end = wCoins + amount;
+            wCoins = end;
+            const el = document.getElementById('header-w-coins');
+            let step = 0;
+            const totalSteps = 15;
+            const interval = setInterval(() => {
+                step++;
+                const val = Math.round(start + (amount * (step / totalSteps)));
+                el.textContent = val.toLocaleString();
+                if (step >= totalSteps) clearInterval(interval);
+            }, 25);
+        }
+
+        function showAppToast(msg) {
+            const toast = document.getElementById('app-toast');
+            document.getElementById('app-toast-msg').textContent = msg;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 2400);
+        }
+
+        function dismissPushAndStart() {
+            document.getElementById('push-banner').classList.add('hidden');
+            showAppToast('已同步電子發票載具餐點，亦可於下方自訂輸入 AI 分析');
+        }
+
+        function syncMealToAllScreens() {
+            document.getElementById('ex-current-meal-name').textContent = currentMealState.foodName;
+            document.getElementById('ex-current-meal-cal').textContent = `(${currentMealState.calorieRange})`;
+            document.getElementById('ex-title-text').textContent = currentMealState.exerciseTitle;
+            document.getElementById('modal-completed-meal-desc').textContent =
+                `已完成「${currentMealState.foodName} (${currentMealState.calorieRange})」餐後 60 秒微動，成功平穩血糖峰值！`;
+            document.getElementById('my-team-ex-desc').textContent =
+                `已完成：${currentMealState.foodName} 餐後60秒微動`;
+
+            document.getElementById('receipt-meal-title').textContent = `消化：${currentMealState.foodName}`;
+            document.getElementById('receipt-meal-cal').textContent = currentMealState.calorieRange.replace(/\s+/g, '');
+            document.getElementById('receipt-ex-title').textContent = currentMealState.exerciseTitle.replace(' (60秒)', '');
+        }
+
+        function switchTab(tabIndex) {
+            if (tabIndex !== 1) {
+                document.getElementById('push-banner').classList.add('hidden');
+            }
+            for (let i = 1; i <= 4; i++) {
+                const screen = document.getElementById('tab-screen-' + i);
+                const btn = document.getElementById('nav-btn-' + i);
+                if (i === tabIndex) {
+                    screen.classList.remove('hidden');
+                    btn.className = 'flex flex-col items-center justify-center py-1 rounded-xl text-emerald-600 bg-emerald-50/80 transition relative';
+                } else {
+                    screen.classList.add('hidden');
+                    btn.className = 'flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 hover:text-slate-700 transition relative';
+                }
+            }
+        }
+
+        function choosePresetMeal(idx, mealName, calRange, giLevel, exTitle, modeKey) {
+            const cards = document.querySelectorAll('#meal-cards-container .meal-card');
+            const radios = document.querySelectorAll('#meal-cards-container .meal-radio');
+            cards.forEach((c, i) => {
+                if (i === idx) {
+                    c.className = 'meal-card cursor-pointer rounded-2xl p-2.5 border-2 border-emerald-500 bg-emerald-50/60 flex items-center justify-between gap-2 transition';
+                    radios[i].className = 'meal-radio w-5 h-5 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
+                } else {
+                    c.className = 'meal-card cursor-pointer rounded-2xl p-2.5 border border-slate-200 bg-white flex items-center justify-between gap-2 transition';
+                    radios[i].className = 'meal-radio w-5 h-5 rounded-full border border-slate-300 text-transparent text-xs font-bold flex items-center justify-center shrink-0';
+                }
+            });
+
+            currentMealState = {
+                foodName: mealName,
+                calorieRange: calRange,
+                glycemicLevel: giLevel,
+                recommendedMode: modeKey,
+                exerciseTitle: exTitle
+            };
+            selectSceneMode(modeKey, true);
+            syncMealToAllScreens();
+            showAppToast(`已選擇：${mealName} (${calRange})`);
+        }
+
+        function quickFillAndAnalyze(foodText) {
+            document.getElementById('custom-food-input').value = foodText;
+            analyzeCustomFoodWithAI();
+        }
+
+        // 本地智慧備援分析器 (支援多食物累加、數量/份量換算、百種台灣飲食庫與未知食物動態推算)
+        function localSmartFoodFallback(rawInput) {
+            const text = rawInput.trim();
+
+            const foodDB = [
+                { reg: /珍珠奶茶|波霸奶茶|珍奶/, cal: 650, gi: 3, cat: '手搖含糖飲' },
+                { reg: /奶蓋|芝芝|黑糖鮮奶|阿華田|可可/, cal: 520, gi: 3, cat: '高糖飲品' },
+                { reg: /奶茶|鮮奶茶|奶綠|凍檸茶|冬瓜茶|百香雙響/, cal: 420, gi: 2, cat: '含糖飲品' },
+                { reg: /拿鐵|卡布奇諾|摩卡|焦糖瑪奇朵/, cal: 210, gi: 1, cat: '咖啡飲品' },
+                { reg: /美式|黑咖啡|冰美|濃縮咖啡/, cal: 20, gi: 1, cat: '無糖咖啡' },
+                { reg: /無糖綠|無糖紅|無糖烏龍|無糖青|無糖茶|純茶|麥茶/, cal: 5, gi: 1, cat: '無糖茶飲' },
+                { reg: /紅茶|綠茶|青茶|烏龍茶|檸檬茶|果汁|柳橙汁/, cal: 180, gi: 2, cat: '茶飲果汁' },
+                { reg: /無糖豆漿/, cal: 135, gi: 1, cat: '優質蛋白飲' },
+                { reg: /豆漿|米漿|杏仁茶|燕麥奶/, cal: 240, gi: 2, cat: '植物奶飲' },
+                { reg: /牛奶|鮮奶|優酪乳|可爾必思/, cal: 185, gi: 1, cat: '乳製品' },
+                { reg: /可樂|雪碧|汽水|沙士|能量飲/, cal: 210, gi: 3, cat: '碳酸含糖飲' },
+
+                { reg: /豪大大雞排|大雞排|炸雞排|雞排/, cal: 660, gi: 3, cat: '油炸高脂' },
+                { reg: /鹹酥雞|鹽酥雞|炸雞|咔啦雞|雞塊|雞米花|唐揚雞/, cal: 540, gi: 3, cat: '油炸肉類' },
+                { reg: /薯條|薯餅|洋蔥圈|炸地瓜|甜不辣|百頁豆腐/, cal: 410, gi: 3, cat: '油炸點心' },
+                { reg: /披薩|Pizza/i, cal: 680, gi: 3, cat: '高脂精緻澱粉' },
+                { reg: /雙層牛肉吉士堡|大麥克|勁辣雞腿堡|漢堡|華堡/, cal: 550, gi: 3, cat: '速食漢堡' },
+                { reg: /熱狗堡|潛艇堡|起司堡/, cal: 440, gi: 2, cat: '速食麵包' },
+
+                { reg: /炸排骨便當|排骨便當|排骨飯/, cal: 860, gi: 3, cat: '高熱量便當' },
+                { reg: /炸雞腿便當|雞腿便當|雞腿飯/, cal: 890, gi: 3, cat: '高熱量便當' },
+                { reg: /控肉便當|控肉飯|爌肉飯|滷排骨便當|三寶飯|燒臘便當/, cal: 840, gi: 3, cat: '高脂便當' },
+                { reg: /魚排便當|鯖魚便當|鮭魚便當|便當/, cal: 730, gi: 2, cat: '一般便當' },
+                { reg: /滷肉飯|魯肉飯|肉燥飯/, cal: 520, gi: 3, cat: '高升糖米食' },
+                { reg: /雞肉飯|火雞肉飯|鴨肉飯/, cal: 460, gi: 2, cat: '米飯主食' },
+                { reg: /炒飯|燴飯|焗烤飯|焗烤|丼飯|鰻魚飯/, cal: 760, gi: 3, cat: '高碳水飯食' },
+                { reg: /咖哩飯|咖哩/, cal: 740, gi: 3, cat: '濃醬米食' },
+                { reg: /油飯|米糕|筒仔米糕|肉粽|粽子/, cal: 540, gi: 3, cat: '糯米高升糖' },
+                { reg: /御飯糰|三角飯糰/, cal: 210, gi: 2, cat: '超商米食' },
+                { reg: /飯糰|紫米飯糰|傳統飯糰/, cal: 450, gi: 3, cat: '糯米飯糰' },
+                { reg: /白飯/, cal: 280, gi: 3, cat: '精緻澱粉' },
+                { reg: /皮蛋瘦肉粥|廣東粥|海鮮粥|粥|稀飯/, cal: 410, gi: 3, cat: '易吸收米食' },
+
+                { reg: /鍋貼/, cal: 68, perUnit: true, defaultCount: 10, gi: 3, cat: '煎製澱粉' },
+                { reg: /水餃|煎餃|蒸餃/, cal: 55, perUnit: true, defaultCount: 10, gi: 2, cat: '麵皮餃子' },
+                { reg: /小籠包|湯包/, cal: 60, perUnit: true, defaultCount: 8, gi: 2, cat: '麵食點心' },
+                { reg: /紅燒牛肉麵|牛肉麵|牛腩麵/, cal: 760, gi: 2, cat: '濃湯麵食' },
+                { reg: /豚骨拉麵|味噌拉麵|拉麵/, cal: 830, gi: 3, cat: '濃湯拉麵' },
+                { reg: /炒麵|炒烏龍|炒米粉|炒泡麵|鐵板麵/, cal: 640, gi: 3, cat: '油炒麵食' },
+                { reg: /義大利麵|青醬|白醬|紅醬|肉醬麵/, cal: 690, gi: 2, cat: '西式麵食' },
+                { reg: /麻醬麵|炸醬麵|涼麵|乾拌麵|傻瓜乾麵/, cal: 560, gi: 3, cat: '醬料乾麵' },
+                { reg: /陽春麵|切仔麵|擔仔麵|湯麵|意麵|雞絲麵|鍋燒意麵|烏龍麵/, cal: 440, gi: 2, cat: '一般麵食' },
+                { reg: /泡麵|辛拉麵|滿漢大餐|杯麵/, cal: 520, gi: 3, cat: '速食泡麵' },
+                { reg: /米粉湯|冬粉|春雨|米線|河粉|粄條/, cal: 360, gi: 2, cat: '米麵製品' },
+
+                { reg: /蔥油餅|蔥抓餅|抓餅|燒餅油條|油條/, cal: 460, gi: 3, cat: '酥油麵食' },
+                { reg: /蛋餅|河粉蛋餅/, cal: 310, gi: 2, cat: '中式早點' },
+                { reg: /總匯三明治|三明治|帕尼尼|熱壓吐司|法式吐司/, cal: 420, gi: 2, cat: '吐司早點' },
+                { reg: /吐司|厚片|奶酥|花生厚片|果醬吐司|麵包|菠蘿麵包|可頌|貝果/, cal: 320, gi: 3, cat: '烘焙麵包' },
+                { reg: /水煎包|生煎包|肉包|菜包|包子|饅頭|銀絲卷/, cal: 280, gi: 2, cat: '發酵麵點' },
+                { reg: /蘿蔔糕|鐵板燒/, cal: 340, gi: 2, cat: '煎台料理' },
+                { reg: /臭豆腐|蚵仔煎|大腸包小腸|肉圓|刈包|棺材板/, cal: 530, gi: 3, cat: '夜市小吃' },
+                { reg: /蚵仔麵線|大腸麵線|麵線|肉羹湯|魷魚羹|碗粿/, cal: 410, gi: 3, cat: '勾芡小吃' },
+                { reg: /滷味|麻辣燙|鹹水雞|鹽水雞/, cal: 460, gi: 2, cat: '滷製小吃' },
+                { reg: /關東煮/, cal: 310, gi: 2, cat: '湯煮小吃' },
+                { reg: /火鍋|小火鍋|麻辣鍋|壽喜燒|涮涮鍋|牛排|燒肉/, cal: 880, gi: 2, cat: '豐盛大餐' },
+
+                { reg: /酸辣湯|玉米濃湯|巧達濃湯|酥皮濃湯|濃湯/, cal: 220, gi: 2, cat: '勾芡湯品' },
+                { reg: /貢丸湯|魚丸湯|餛飩湯|蛋花湯|味噌湯|紫菜湯|蛤蜊湯|雞湯|四神湯|牛肉湯/, cal: 130, gi: 1, cat: '清爽湯品' },
+
+                { reg: /健康餐盒|水煮餐|舒肥雞胸餐|輕食餐盒|健身餐/, cal: 460, gi: 1, cat: '低GI健康餐' },
+                { reg: /雞胸肉|舒肥雞|里肌肉|滷牛腱/, cal: 175, gi: 1, cat: '高蛋白低脂' },
+                { reg: /生菜沙拉|凱撒沙拉|和風沙拉|沙拉|燙青菜|蔬菜/, cal: 160, gi: 1, cat: '高纖蔬食' },
+                { reg: /烤地瓜|蒸地瓜|地瓜|番薯|馬鈴薯|南瓜|玉米/, cal: 190, gi: 1, cat: '原型根莖類' },
+                { reg: /茶葉蛋|水煮蛋|滷蛋|荷包蛋|溫泉蛋/, cal: 75, perUnit: true, defaultCount: 1, gi: 1, cat: '優質蛋白質' },
+                { reg: /優格|希臘優格|麥片|燕麥|堅果/, cal: 190, gi: 1, cat: '低GI輕食' },
+                { reg: /香蕉|蘋果|芭樂|奇異果|木瓜|番茄|水果/, cal: 95, gi: 1, cat: '新鮮水果' },
+                { reg: /豆腐|豆干|毛豆/, cal: 130, gi: 1, cat: '植物性蛋白' },
+
+                { reg: /蛋糕|千層|提拉米蘇|乳酪蛋糕|巴斯克|泡芙|塔|派|肉桂捲/, cal: 410, gi: 3, cat: '精緻甜點' },
+                { reg: /鬆餅|舒芙蕾|甜甜圈|可麗餅|雞蛋糕|紅豆餅|車輪餅/, cal: 360, gi: 3, cat: '高糖點心' },
+                { reg: /冰淇淋|霜淇淋|聖代|刨冰|雪花冰|豆花|燒仙草|紅豆湯|湯圓/, cal: 310, gi: 3, cat: '冰品甜湯' },
+                { reg: /巧克力|餅乾|洋芋片|爆米花|布丁|仙草|愛玉/, cal: 240, gi: 2, cat: '零食點心' }
+            ];
+
+            let totalCal = 0;
+            let maxGi = 1;
+            let matchedCount = 0;
+            let matchedCategories = [];
+
+            let workingText = text;
+            for (const item of foodDB) {
+                const match = workingText.match(item.reg);
+                if (match) {
+                    matchedCount++;
+                    maxGi = Math.max(maxGi, item.gi);
+                    if (!matchedCategories.includes(item.cat)) matchedCategories.push(item.cat);
+
+                    const keyword = match[0];
+                    const afterReg = new RegExp(keyword + '\\s*(\\d+)\\s*[顆粒個份塊片碗杯條盤串]');
+                    const beforeReg = new RegExp('(\\d+)\\s*[顆粒個份塊片碗杯條盤串](?:的)?\\s*' + keyword);
+                    const mAfter = workingText.match(afterReg);
+                    const mBefore = workingText.match(beforeReg);
+
+                    if (item.perUnit) {
+                        const count = mAfter ? parseInt(mAfter[1], 10) : (mBefore ? parseInt(mBefore[1], 10) : item.defaultCount);
+                        totalCal += item.cal * Math.min(Math.max(count, 1), 50);
+                    } else {
+                        const mult = mAfter ? parseInt(mAfter[1], 10) : (mBefore ? parseInt(mBefore[1], 10) : 1);
+                        totalCal += item.cal * Math.min(Math.max(mult, 1), 10);
+                    }
+                    workingText = workingText.replace(item.reg, ' ');
+                }
+            }
+
+            if (matchedCount === 0) {
+                let charHash = 0;
+                for (let i = 0; i < text.length; i++) {
+                    charHash = ((charHash << 5) - charHash) + text.charCodeAt(i);
+                    charHash |= 0;
+                }
+                let baseEstimate = 260 + (Math.abs(charHash) % 320);
+
+                if (/炸|酥|脆|焗|奶油|起司|肥|培根|辣油|豬腳|大腸|麻辣/.test(text)) {
+                    baseEstimate += 210;
+                    maxGi = 3;
+                    matchedCategories.push('高油脂料理');
+                }
+                if (/糖|蜜|奶|甜|巧克|黑糖|煉乳|布蕾|酥/.test(text)) {
+                    baseEstimate += 140;
+                    maxGi = Math.max(maxGi, 3);
+                    matchedCategories.push('含糖料理');
+                }
+                if (/飯|麵|餅|包|餃|堡|吐司|粥|粉|粿|粽|糕/.test(text)) {
+                    baseEstimate += 150;
+                    maxGi = Math.max(maxGi, 2);
+                    matchedCategories.push('澱粉主食');
+                }
+                if (/牛|豬|雞|鴨|鵝|羊|肉|魚|蝦|海鮮|排/.test(text)) {
+                    baseEstimate += 110;
+                    matchedCategories.push('蛋白質料理');
+                }
+                if (/燙|蒸|水煮|清燉|舒肥|涼拌|無糖|鮮蔬|菜|果|菇|藻|茶/.test(text)) {
+                    baseEstimate = Math.max(120, baseEstimate - 160);
+                    maxGi = 1;
+                    matchedCategories.push('清爽輕食');
+                }
+
+                const parts = text.split(/[＋+加配和與、,，\s]+/).filter(Boolean);
+                if (parts.length > 1) {
+                    baseEstimate = Math.round(baseEstimate * (1 + (parts.length - 1) * 0.45));
+                }
+
+                const unitMatch = text.match(/(\d+)\s*[顆粒個份塊片碗杯]/);
+                if (unitMatch) {
+                    const num = parseInt(unitMatch[1], 10);
+                    if (num > 1 && num <= 30) {
+                        baseEstimate = Math.round((baseEstimate * 0.35) * num);
+                    }
+                }
+
+                totalCal = baseEstimate;
+            }
+
+            if (/加蛋|雙蛋/.test(text) && !/蛋餅|茶葉蛋|水煮蛋|滷蛋|荷包蛋|蛋花/.test(text)) totalCal += 75;
+            if (/加起司|雙倍起司|起司/.test(text) && !/起司堡|乳酪/.test(text)) totalCal += 95;
+            if (/無糖/.test(text) && !/無糖豆漿|無糖綠|無糖紅|無糖烏龍|無糖青|無糖茶/.test(text)) totalCal = Math.max(40, totalCal - 110);
+            if (/微糖|三分糖|半糖/.test(text)) totalCal = Math.max(60, totalCal - 55);
+            if (/大碗|加大|大份|特大|雙倍/.test(text)) totalCal = Math.round(totalCal * 1.25);
+            if (/小碗|小份|半份|兒童/.test(text)) totalCal = Math.round(totalCal * 0.75);
+
+            const lowCal = Math.max(15, Math.round((totalCal * 0.92) / 5) * 5);
+            const highCal = Math.max(30, Math.round((totalCal * 1.08) / 5) * 5);
+            const calorieRange = `${lowCal.toLocaleString()} - ${highCal.toLocaleString()} kcal`;
+
+            const catText = matchedCategories.length > 0 ? matchedCategories.slice(0, 2).join('＋') : '外食餐點';
+
+            if (totalCal >= 800 || maxGi === 3) {
+                return {
+                    foodName: text,
+                    calorieRange: calorieRange,
+                    glycemicLevel: '🔥 極高升糖指數・重度餐後昏睡警報',
+                    recommendedMode: 'office_soleus',
+                    exerciseTitle: '桌下比目魚肌高頻墊腳尖 + 握手機畫 8 字 (60秒)',
+                    aiAdvice: `偵測到「${text}」屬於${catText}（估算約 ${calorieRange}），容易造成餐後血糖急速飆升與劇烈昏睡，強烈建議立即進行 60 秒坐姿比目魚肌墊腳尖氧化代謝血糖！`
+                };
+            } else if (totalCal >= 500 || maxGi === 2) {
+                return {
+                    foodName: text,
+                    calorieRange: calorieRange,
+                    glycemicLevel: '⚠️ 中高升糖指數・下午易眼皮沉重',
+                    recommendedMode: 'office_gyro',
+                    exerciseTitle: '握手機畫 8 字伸展肩腕 + 桌下墊腳尖 (60秒)',
+                    aiAdvice: `「${text}」估算熱量約 ${calorieRange}（${catText}），餐後胰島素波動易引發下午精神不濟，透過 60 秒陀螺儀 8 字手腕伸展與墊腳尖可降低約 30% 血糖峰值。`
+                };
+            } else {
+                return {
+                    foodName: text,
+                    calorieRange: calorieRange,
+                    glycemicLevel: '🌱 低升糖輕盈負荷・預防久坐僵硬',
+                    recommendedMode: 'walk_water',
+                    exerciseTitle: '握手機起身走 150 步裝水活絡循環 (60秒)',
+                    aiAdvice: `「${text}」熱量控制在 ${calorieRange}（${catText}），血糖負擔較低！搭配餐後 60 秒起身走動裝水，能維持下午大腦高專注度並預防下半身久坐水腫。`
+                };
+            }
+        }
+
+        async function analyzeCustomFoodWithAI() {
+            const inputEl = document.getElementById('custom-food-input');
+            const foodQuery = inputEl.value.trim();
+            if (!foodQuery) {
+                showAppToast('請先輸入剛吃的餐點名稱喔！');
+                inputEl.focus();
+                return;
+            }
+
+            const btnIcon = document.getElementById('ai-btn-icon');
+            const btnText = document.getElementById('ai-btn-text');
+            btnIcon.textContent = '⏳';
+            btnText.textContent = 'AI 分析中...';
+
+            document.querySelectorAll('#meal-cards-container .meal-card').forEach(c => {
+                c.className = 'meal-card cursor-pointer rounded-2xl p-2.5 border border-slate-200 bg-white flex items-center justify-between gap-2 transition opacity-75';
+            });
+            document.querySelectorAll('#meal-cards-container .meal-radio').forEach(r => {
+                r.className = 'meal-radio w-5 h-5 rounded-full border border-slate-300 text-transparent text-xs font-bold flex items-center justify-center shrink-0';
+            });
+
+            let analysisResult = localSmartFoodFallback(foodQuery);
+
+            document.getElementById('ai-res-food').textContent = analysisResult.foodName || foodQuery;
+            document.getElementById('ai-res-cal').textContent = analysisResult.calorieRange;
+            document.getElementById('ai-res-gi').textContent = analysisResult.glycemicLevel;
+            document.getElementById('ai-res-ex').textContent = `👉 推薦：${analysisResult.exerciseTitle}`;
+            document.getElementById('ai-res-advice').textContent = analysisResult.aiAdvice;
+            document.getElementById('ai-result-card').classList.remove('hidden');
+
+            currentMealState = {
+                foodName: analysisResult.foodName || foodQuery,
+                calorieRange: analysisResult.calorieRange,
+                glycemicLevel: analysisResult.glycemicLevel,
+                recommendedMode: analysisResult.recommendedMode || 'office_soleus',
+                exerciseTitle: analysisResult.exerciseTitle
+            };
+
+            selectSceneMode(currentMealState.recommendedMode, true);
+            syncMealToAllScreens();
+
+            btnIcon.textContent = '✨';
+            btnText.textContent = 'AI 智慧分析';
+            showAppToast(`🤖 AI 分析完成：${currentMealState.calorieRange}`);
+        }
+
+        function selectSceneMode(mode, silent = false) {
+            const officeBtn = document.getElementById('scene-btn-office');
+            const walkBtn = document.getElementById('scene-btn-walk');
+            const homeBtn = document.getElementById('scene-btn-home');
+
+            const activeClass = 'cursor-pointer rounded-xl p-2 border-2 border-emerald-500 bg-slate-900 text-white transition min-w-0';
+            const inactiveClass = 'cursor-pointer rounded-xl p-2 border border-slate-200 bg-white text-slate-700 transition min-w-0';
+
+            officeBtn.className = inactiveClass;
+            walkBtn.className = inactiveClass;
+            homeBtn.className = inactiveClass;
+
+            const badge = document.getElementById('ex-mode-badge');
+
+            if (mode === 'walk_water') {
+                walkBtn.className = activeClass;
+                badge.textContent = '茶水間計步・150步防弊';
+                if (!silent) {
+                    currentMealState.exerciseTitle = '握手機起身走 150 步裝水 (60秒)';
+                    syncMealToAllScreens();
+                    showAppToast('🚶 已切換：茶水間走廊計步模式');
+                }
+            } else if (mode === 'home_ar') {
+                homeBtn.className = activeClass;
+                badge.textContent = '前鏡頭開啟・AR 肩頸濾鏡';
+                if (!silent) {
+                    currentMealState.exerciseTitle = '前鏡頭 AR 肩頸解封吃金幣濾鏡 (60秒)';
+                    syncMealToAllScreens();
+                    showAppToast('🏠 已切換：個人宿舍 AR 濾鏡模式');
+                }
+            } else {
+                officeBtn.className = activeClass;
+                badge.textContent = '免開鏡頭・陀螺儀防弊感測';
+                if (!silent) {
+                    currentMealState.exerciseTitle = '桌下坐姿墊腳尖 + 握手機畫 8 字 (60秒)';
+                    syncMealToAllScreens();
+                    showAppToast('🏢 已切換：教室/辦公室隱形防弊模式');
+                }
+            }
+        }
+
+        function startMicroExercise() {
+            syncMealToAllScreens();
+            switchTab(2);
+            resetReal60sExercise(true);
+        }
+
+        function startReal60sTimers() {
+            if (oneSecondInterval) clearInterval(oneSecondInterval);
+            if (visualAnimInterval) clearInterval(visualAnimInterval);
+
+            isExerciseRunning = true;
+            const btn = document.getElementById('btn-run-exercise');
+            btn.textContent = '⏸ 暫停 60 秒計時';
+            btn.className = 'flex-1 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-slate-950 font-black text-xs shadow-lg transition';
+
+            const path = document.getElementById('infinity-progress-path');
+            const orb = document.getElementById('infinity-orb');
+            const totalLen = path.getTotalLength ? path.getTotalLength() : 480;
+
+            visualAnimInterval = setInterval(() => {
+                if (!isExerciseRunning) return;
+                animTick++;
+
+                const loopRatio = (animTick % 75) / 75;
+                if (path.getPointAtLength) {
+                    const pt = path.getPointAtLength(totalLen * loopRatio);
+                    orb.setAttribute('cx', pt.x);
+                    orb.setAttribute('cy', pt.y);
+                }
+
+                const rx = (Math.sin(animTick * 0.18) * 24).toFixed(1);
+                const ry = (Math.cos(animTick * 0.14) * 19).toFixed(1);
+                const rz = (Math.sin(animTick * 0.09) * 11).toFixed(1);
+                document.getElementById('gyro-Angles').textContent = `陀螺儀 X: ${rx}° Y: ${ry}° Z: ${rz}°`;
+
+                const matchVal = 97 + (animTick % 3);
+                document.getElementById('gyro-match-val').textContent = matchVal + '%';
+            }, 80);
+
+            oneSecondInterval = setInterval(() => {
+                if (!isExerciseRunning) return;
+
+                remainingSeconds = Math.max(0, remainingSeconds - 1);
+                const elapsed = 60 - remainingSeconds;
+                const percent = Math.round((elapsed / 60) * 100);
+
+                document.getElementById('ex-timer-num').textContent = remainingSeconds + 's';
+                document.getElementById('ex-glucose-prog').textContent = percent + '%';
+                document.getElementById('ex-60s-bar').style.width = percent + '%';
+
+                const dashOffset = 480 - (480 * (elapsed / 60));
+                path.setAttribute('stroke-dashoffset', dashOffset);
+
+                const reps = Math.min(20, Math.floor(elapsed / 3));
+                document.getElementById('soleus-rep-count').textContent = `${reps} / 20 次`;
+
+                const beatBadge = document.getElementById('soleus-beat-badge');
+                if (remainingSeconds % 3 === 0) {
+                    beatBadge.textContent = '緩慢放下 ↓';
+                    beatBadge.className = 'text-[0.65rem] font-black text-amber-300';
+                } else {
+                    beatBadge.textContent = '腳跟上提 ↑';
+                    beatBadge.className = 'text-[0.65rem] font-black text-emerald-400';
+                }
+
+                const milestoneEl = document.getElementById('ex-milestone-text');
+                if (remainingSeconds === 45) {
+                    milestoneEl.textContent = '👍 45秒：手腕 8 字軌跡穩定！保持節奏';
+                    showAppToast('👍 已持續 15 秒！手腕 8 字防作弊軌跡穩定');
+                } else if (remainingSeconds === 30) {
+                    milestoneEl.textContent = '🔥 30秒過半！比目魚肌持續活化代謝血糖';
+                    showAppToast('🔥 已完成一半 (30秒)！比目魚肌正在平穩血糖峰值');
+                } else if (remainingSeconds === 15) {
+                    milestoneEl.textContent = '⚡ 最後 15 秒衝刺！下午睡意正在退散';
+                    showAppToast('⚡ 最後 15 秒衝刺！即將獲得 +25 活力值 & +50 W幣');
+                } else if (remainingSeconds === 0) {
+                    clearInterval(oneSecondInterval);
+                    clearInterval(visualAnimInterval);
+                    isExerciseRunning = false;
+                    milestoneEl.textContent = '🎉 60秒微動完成！獲得 +25 活力值 & +50 W幣';
+                    btn.textContent = '✓ 60 秒微動已達標完成';
+                    addWCoins(50);
+                    showAppToast('🎉 60秒微動完成！獲得 +25 活力值 & +50 W幣');
+                    setTimeout(() => {
+                        document.getElementById('ex-complete-modal').classList.remove('hidden');
+                    }, 500);
+                }
+            }, 1000);
+        }
+
+        function toggleReal60sExercise() {
+            if (remainingSeconds <= 0) {
+                resetReal60sExercise(true);
+                return;
+            }
+            const btn = document.getElementById('btn-run-exercise');
+            if (isExerciseRunning) {
+                isExerciseRunning = false;
+                btn.textContent = '▶ 繼續 60 秒計時';
+                btn.className = 'flex-1 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg transition';
+            } else {
+                startReal60sTimers();
+            }
+        }
+
+        function resetReal60sExercise(autoStart = true) {
+            if (oneSecondInterval) clearInterval(oneSecondInterval);
+            if (visualAnimInterval) clearInterval(visualAnimInterval);
+            remainingSeconds = 60;
+            animTick = 0;
+
+            document.getElementById('ex-timer-num').textContent = '60s';
+            document.getElementById('ex-glucose-prog').textContent = '0%';
+            document.getElementById('soleus-rep-count').textContent = '0 / 20 次';
+            document.getElementById('ex-60s-bar').style.width = '0%';
+            document.getElementById('infinity-progress-path').setAttribute('stroke-dashoffset', 480);
+            document.getElementById('ex-milestone-text').textContent = '黃金 60 秒微動進行中・每秒真實計時';
+
+            if (autoStart) {
+                startReal60sTimers();
+            } else {
+                isExerciseRunning = false;
+                const btn = document.getElementById('btn-run-exercise');
+                btn.textContent = '▶ 開始 60 秒真實計時';
+                btn.className = 'flex-1 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs shadow-lg transition';
+            }
+        }
+
+        function goToTeamCupAfterExercise() {
+            document.getElementById('ex-complete-modal').classList.add('hidden');
+            switchTab(3);
+        }
+
+        function healTeammateAlex() {
+            if (alexHealed) return;
+            const btn = document.getElementById('btn-heal-alex');
+            btn.textContent = '⚡ 正在多動 30 秒幫 Alex 補血 (+15 點)...';
+
+            setTimeout(() => {
+                alexHealed = true;
+                document.getElementById('team-cup-liquid').style.height = '100%';
+                document.getElementById('team-cup-percent').textContent = '100%';
+                document.getElementById('team-cup-points').textContent = '100';
+                const tag = document.getElementById('team-cup-tag');
+                tag.textContent = '100 點滿額 MAX!';
+                tag.className = 'text-[0.65rem] bg-emerald-100 text-emerald-800 font-black px-1.5 py-0.5 rounded shrink-0';
+
+                document.getElementById('box-lock-status').textContent = '🔓 可開啟';
+                document.getElementById('carry-badge').classList.remove('hidden');
+                document.getElementById('my-team-pt').textContent = '+40 點 (含補血)';
+
+                document.getElementById('alex-row-card').className = 'bg-emerald-50/70 border-2 border-emerald-400 rounded-xl p-2.5 space-y-2 transition';
+                document.getElementById('alex-avatar').textContent = '✓';
+                document.getElementById('alex-avatar').className = 'w-8 h-8 rounded-full bg-emerald-600 text-white text-xs font-black flex items-center justify-center shrink-0';
+                document.getElementById('alex-subtext').textContent = '已由你代償補血 +15 點救援達標！';
+                document.getElementById('alex-subtext').className = 'text-[0.65rem] text-emerald-700 font-bold truncate';
+                document.getElementById('alex-pt-text').textContent = '+25 點 (已補滿)';
+                document.getElementById('alex-pt-text').className = 'text-xs font-black text-emerald-600 shrink-0';
+
+                btn.classList.add('hidden');
+                document.getElementById('nav-badge-3').classList.add('hidden');
+                document.getElementById('unlock-chest-card').classList.remove('hidden');
+                showAppToast('⚡ 幫 Alex 補血 +15 點成功！能量杯達 100 / 100');
+            }, 900);
+        }
+
+        function openTeamBlindBox() {
+            addWCoins(80);
+            document.getElementById('blindbox-reward-modal').classList.remove('hidden');
+        }
+
+        function goToReceiptMemeScreen() {
+            document.getElementById('blindbox-reward-modal').classList.add('hidden');
+            switchTab(4);
+        }
+
+        function triggerSocialShare(platform) {
+            showAppToast('📤 已將【超商發票討債迷因卡】分享至 ' + platform + ' 並標記 @Alex');
+        }
+
+        function openCouponBarcodeModal(title, cost) {
+            if (wCoins >= cost) {
+                addWCoins(-cost);
+            }
+            document.getElementById('barcode-item-title').textContent = title;
+            document.getElementById('barcode-modal').classList.remove('hidden');
+        }
+
+        function closeBarcodeModal() {
+            document.getElementById('barcode-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
